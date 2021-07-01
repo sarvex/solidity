@@ -66,33 +66,38 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_relative_path)
 	TemporaryDirectory tempDir("file-reader-test-");
 	boost::filesystem::create_directories(tempDir.path() / "x/y/z");
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path() / "x/y/z");
-	soltestAssert(tempDir.path().is_absolute(), "");
 
-	cout << "Actual: " << FileReader::normalizeCLIPathForVFS(".") << " | Expected: " << tempDir.path() / "x/y/z/" << endl;
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS(".") == tempDir.path() / "x/y/z/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./") == tempDir.path() / "x/y/z/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("../") == tempDir.path() / "x/y/");
+	// NOTE: If path to work dir contains symlinks, boost might resolve them, making the path
+	// different from tempDirPath.
+	soltestAssert(boost::filesystem::current_path().is_absolute(), "");
+	boost::filesystem::path tempDirPath = boost::filesystem::current_path().parent_path().parent_path().parent_path();
+	soltestAssert(tempDirPath.is_absolute(), "");
 
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a") == tempDir.path() / "x/y/z/a");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/") == tempDir.path() / "x/y/z/a/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/.") == tempDir.path() / "x/y/z/a/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./a") == tempDir.path() / "x/y/z/a");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./a/") == tempDir.path() / "x/y/z/a/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./a/.") == tempDir.path() / "x/y/z/a/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/b") == tempDir.path() / "x/y/z/a/b");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/b/") == tempDir.path() / "x/y/z/a/b/");
+	cout << "Actual: " << FileReader::normalizeCLIPathForVFS(".") << " | Expected: " << tempDirPath / "x/y/z/" << endl;
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS(".") == tempDirPath / "x/y/z/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./") == tempDirPath / "x/y/z/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("../") == tempDirPath / "x/y/");
 
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("../a/b") == tempDir.path() / "x/y/a/b");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("../../a/b") == tempDir.path() / "x/a/b");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./a/b") == tempDir.path() / "x/y/z/a/b");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("././a/b") == tempDir.path() / "x/y/z/a/b");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a") == tempDirPath / "x/y/z/a");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/") == tempDirPath / "x/y/z/a/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/.") == tempDirPath / "x/y/z/a/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./a") == tempDirPath / "x/y/z/a");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./a/") == tempDirPath / "x/y/z/a/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./a/.") == tempDirPath / "x/y/z/a/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/b") == tempDirPath / "x/y/z/a/b");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/b/") == tempDirPath / "x/y/z/a/b/");
 
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/./b/") == tempDir.path() / "x/y/z/a/b/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/../a/b/") == tempDir.path() / "x/y/z/a/b/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/b/c/..") == tempDir.path() / "x/y/z/a/b");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/b/c/../") == tempDir.path() / "x/y/z/a/b/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("../a/b") == tempDirPath / "x/y/a/b");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("../../a/b") == tempDirPath / "x/a/b");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./a/b") == tempDirPath / "x/y/z/a/b");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("././a/b") == tempDirPath / "x/y/z/a/b");
 
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("../../a/.././../p/../q/../a/b") == tempDir.path() / "a/b");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/./b/") == tempDirPath / "x/y/z/a/b/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/../a/b/") == tempDirPath / "x/y/z/a/b/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/b/c/..") == tempDirPath / "x/y/z/a/b");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/b/c/../") == tempDirPath / "x/y/z/a/b/");
+
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("../../a/.././../p/../q/../a/b") == tempDirPath / "a/b");
 
 }
 
@@ -138,6 +143,8 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_root_name_only)
 	TemporaryDirectory tempDir("file-reader-test-");
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path());
 
+	boost::filesystem::path workDir = boost::filesystem::current_path();
+
 	// A root **path** consists of a directory name (typically / or \) and the root name (drive
 	// letter (C:), UNC host name (//host), etc.). Either can be empty. Root path as a whole is an
 	// absolute path but root name on its own is considered relative. For example on Windows
@@ -145,19 +152,19 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_root_name_only)
 	// directory.
 
 	// UNC paths
-	cout << "Actual: " << FileReader::normalizeCLIPathForVFS("//") << " | Expected: " << "//" / tempDir.path() << endl;
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("//") == "//" / tempDir.path());
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("//host") == "//host" / tempDir.path());
+	cout << "Actual: " << FileReader::normalizeCLIPathForVFS("//") << " | Expected: " << "//" / workDir << endl;
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("//") == "//" / workDir);
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("//host") == "//host" / workDir);
 
 	// On UNIX systems root name is empty.
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("") == tempDir.path());
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("") == workDir);
 
 #if defined(_WIN32)
-	boost::filesystem::path driveLetter = tempDir.path().root_name();
+	boost::filesystem::path driveLetter = workDir.root_name();
 	solAssert(!driveLetter.empty(), "");
 	solAssert(driveLetter.is_relative(), "");
 
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS(driveLetter) == tempDir.path());
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS(driveLetter) == workDir);
 #endif
 }
 
@@ -166,11 +173,13 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_stripping_root_name)
 {
 	TemporaryDirectory tempDir("file-reader-test-");
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path());
-	soltestAssert(tempDir.path().is_absolute(), "");
-	soltestAssert(!tempDir.path().root_name().empty(), "");
 
-	boost::filesystem::path normalizedPath = FileReader::normalizeCLIPathForVFS(tempDir.path());
-	BOOST_TEST(normalizedPath == "\\" / tempDir.path().lexically_relative(tempDir.path().root_name()));
+	boost::filesystem::path workDir = boost::filesystem::current_path();
+	soltestAssert(workDir.is_absolute(), "");
+	soltestAssert(!workDir.root_name().empty(), "");
+
+	boost::filesystem::path normalizedPath = FileReader::normalizeCLIPathForVFS(workDir);
+	BOOST_TEST(normalizedPath == "\\" / workDir.lexically_relative(workDir.root_name()));
 	BOOST_TEST(normalizedPath.root_name().empty());
 	BOOST_TEST(normalizedPath.root_directory() == "\\");
 }
