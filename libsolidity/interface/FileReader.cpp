@@ -185,11 +185,10 @@ boost::filesystem::path FileReader::normalizeCLIPathForVFS(boost::filesystem::pa
 bool FileReader::isPathPrefix(boost::filesystem::path _prefix, boost::filesystem::path const& _path)
 {
 	solAssert(!_prefix.empty() && !_path.empty(), "");
-	solAssert(_prefix.is_absolute() && _path.is_absolute(), "");
+	solAssert(_prefix.is_absolute() || isUNCPath(_prefix), "");
+	solAssert(_path.is_absolute() || isUNCPath(_path), "");
 	solAssert(_prefix == _prefix.lexically_normal() && _path == _path.lexically_normal(), "");
 	solAssert(!hasDotDotSegments(_prefix) && !hasDotDotSegments(_path), "");
-	solAssert(!boost::starts_with(_prefix.root_name().string(), "\\\\"), "");
-	solAssert(!boost::starts_with(_path.root_name().string(), "\\\\"), "");
 
 	// Before 1.72.0 lexically_relative() was not handling paths with empty, dot and dot dot segments
 	// correctly (see https://github.com/boostorg/filesystem/issues/76). The only case where this
