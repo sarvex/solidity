@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_case_sensitivity)
 	cout << "Replace root with \\ lexically_relative: "<< "\\" / tempDir.path().lexically_relative(tempDir.path().root_path()) << endl;
 	cout << "Replace root with / as string: "<< boost::filesystem::path("/" + tempDir.path().relative_path().generic_string()) << endl;
 
-	boost::filesystem::path expectedPrefix = boost::filesystem::path("/") / tempDir.path().lexically_relative(tempDir.path().root_path());
+	boost::filesystem::path expectedPrefix = "/" / tempDir.path().relative_path();
 	soltestAssert(expectedPrefix.is_absolute() || expectedPrefix.root_path() == "/", "");
 
 	bool caseSensitiveFilesystem = boost::filesystem::create_directories(tempDir.path() / "ABC");
