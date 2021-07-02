@@ -21,6 +21,7 @@
 #include <libsolidity/interface/FileReader.h>
 
 #include <test/Common.h>
+#include <test/FilesystemUtils.h>
 #include <test/TemporaryDirectory.h>
 #include <test/libsolidity/util/SoltestErrors.h>
 
@@ -233,6 +234,38 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_path_separators)
 {
 	// Even on Windows we want / as a separator.
 	BOOST_TEST((FileReader::normalizeCLIPathForVFS("/a/b/c").native() == boost::filesystem::path("/a/b/c").native()));
+}
+
+BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_should_not_resolve_symlinks)
+{
+	TemporaryDirectory tempDir("file-reader-test-");
+	soltestAssert(tempDir.path().is_absolute(), "");
+	boost::filesystem::create_directories(tempDir.path() / "abc");
+
+	if (!createSymlinkIfSupportedByFilesystem(tempDir.path() / "abc", tempDir.path() / "sym"))
+		return;
+
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS(tempDir.path() / "sym/contract.sol") == tempDir.path() / "sym/contract.sol"));
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS(tempDir.path() / "abc/contract.sol") == tempDir.path() / "abc/contract.sol"));
+}
+
+BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_may_resolve_symlinks_in_workdir_when_path_is_relative)
+{
+	TemporaryDirectory tempDir("file-reader-test-");
+	soltestAssert(tempDir.path().is_absolute(), "");
+	boost::filesystem::create_directories(tempDir.path() / "abc");
+
+	if (!createSymlinkIfSupportedByFilesystem(tempDir.path() / "abc", tempDir.path() / "sym"))
+		return;
+
+	TemporaryWorkingDirectory tempWorkDir(tempDir.path() / "sym");
+	boost::filesystem::path actualWorkingDir = boost::filesystem::current_path();
+
+	// current_path() seems to return the with symlinks resolved. Whether it does or not,
+	// normalizeCLIPathForVFS() should use the same form of the working dir for relative paths.
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS("contract.sol") == actualWorkingDir / "contract.sol"));
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS(tempDir.path() / "sym/contract.sol") == tempDir.path() / "sym/contract.sol"));
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS(tempDir.path() / "abc/contract.sol") == tempDir.path() / "abc/contract.sol"));
 }
 
 BOOST_AUTO_TEST_CASE(isPathPrefix_file_prefix)
