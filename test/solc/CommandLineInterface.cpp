@@ -577,6 +577,9 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_normalization_and_weird_name
 	soltestAssert(uncPath[0] == '/' && uncPath[1] == '/', "");
 	soltestAssert(uncPath[2] != '/', "");
 
+	boost::filesystem::path workDir = boost::filesystem::current_path();
+	soltestAssert(workDir.is_absolute(), "");
+
 	vector<string> commandLine = {
 		"solc",
 
@@ -672,8 +675,8 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_normalization_and_weird_name
 		{"a/b/contract9.sol", ""},
 		{"a/b/contract10.sol", ""},
 
-		{tempDir.path().generic_string() + "/x/y/a/b/contract11.sol", ""},
-		{tempDir.path().generic_string() + "/x/a/b/contract12.sol", ""},
+		{workDir.parent_path().generic_string() + "/a/b/contract11.sol", ""},
+		{workDir.parent_path().parent_path().generic_string() + "/a/b/contract12.sol", ""},
 		{"b/contract13.sol", ""},
 		{"contract14.sol", ""},
 		{"b/contract15.sol", ""},
