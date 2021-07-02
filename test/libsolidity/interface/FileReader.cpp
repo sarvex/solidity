@@ -372,6 +372,37 @@ BOOST_AUTO_TEST_CASE(stripPathPrefix_directory_prefix)
 	BOOST_TEST(FileReader::stripPathPrefix("/a/bc/def/", "/a/bc/def/") == ".");
 }
 
+BOOST_AUTO_TEST_CASE(isUNCPath)
+{
+	BOOST_TEST(FileReader::isUNCPath("//"));
+	BOOST_TEST(FileReader::isUNCPath("//\\"));
+	BOOST_TEST(FileReader::isUNCPath("//root"));
+	BOOST_TEST(FileReader::isUNCPath("//root/"));
+
+#if defined(_WIN32)
+	BOOST_TEST(FileReader::isUNCPath("\\\\"));
+	BOOST_TEST(FileReader::isUNCPath("\\\\/"));
+	BOOST_TEST(FileReader::isUNCPath("\\\\root"));
+	BOOST_TEST(FileReader::isUNCPath("\\\\root/"));
+#else
+	BOOST_TEST(!FileReader::isUNCPath("\\\\"));
+	BOOST_TEST(!FileReader::isUNCPath("\\\\/"));
+	BOOST_TEST(!FileReader::isUNCPath("\\\\root"));
+	BOOST_TEST(!FileReader::isUNCPath("\\\\root/"));
+#endif
+
+	BOOST_TEST(!FileReader::isUNCPath("\\/"));
+	BOOST_TEST(!FileReader::isUNCPath("/\\"));
+
+	BOOST_TEST(!FileReader::isUNCPath(""));
+	BOOST_TEST(!FileReader::isUNCPath("."));
+	BOOST_TEST(!FileReader::isUNCPath(".."));
+	BOOST_TEST(!FileReader::isUNCPath("/"));
+	BOOST_TEST(!FileReader::isUNCPath("a"));
+	BOOST_TEST(!FileReader::isUNCPath("a/b/c"));
+	BOOST_TEST(!FileReader::isUNCPath("contract.sol"));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace solidity::frontend::test

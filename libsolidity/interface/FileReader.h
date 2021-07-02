@@ -110,6 +110,12 @@ public:
 	/// Returns '.' if @a _path and @_prefix are identical.
 	static boost::filesystem::path stripPathPrefix(boost::filesystem::path _prefix, boost::filesystem::path const& _path);
 
+	// Returns true if the specified path is an UNC path.
+	// UNC paths start with // followed by a name (on Windows they can also start with \\).
+	// They are used for network shares on Windows. On UNIX systems they do not have the same
+	// functionality but usually they are still recognized and treated in a special way.
+	static bool isUNCPath(boost::filesystem::path const& _path);
+
 private:
 	/// If @a _path starts with a number of .. segments, returns a path consisting only of those
 	/// segments (root name is not included). Otherwise returns an empty path. @a _path must be absolute.

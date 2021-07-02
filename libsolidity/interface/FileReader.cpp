@@ -122,10 +122,7 @@ boost::filesystem::path FileReader::normalizeCLIPathForVFS(boost::filesystem::pa
 	// include the root name. Do do this only for non-UNC paths - my experiments show that when
 	// the working dir is an UNC path, / does not not actually refer to the root of the UNC path.
 	boost::filesystem::path normalizedRootPath = normalizedPath.root_path();
-	if (
-		!boost::starts_with(normalizedPath.root_name().string(), "//") &&
-		!boost::starts_with(normalizedPath.root_name().string(), "\\\\")
-	)
+	if (!isUNCPath(normalizedPath))
 	{
 		boost::filesystem::path workingDirRootPath = boost::filesystem::weakly_canonical(boost::filesystem::current_path()).root_path();
 		if (normalizedPath.root_name() == workingDirRootPath)
@@ -204,6 +201,21 @@ bool FileReader::hasDotDotSegments(boost::filesystem::path const& _path)
 			return true;
 
 	return false;
+}
+
+bool FileReader::isUNCPath(boost::filesystem::path const& _path)
+{
+	string rootName = _path.root_name().string();
+
+	return (
+		rootName.size() == 2 ||
+		(rootName.size() > 2 && rootName[2] != rootName[1])
+	) && (
+		(rootName[0] == '/' && rootName[1] == '/')
+#if defined(_WIN32)
+		|| (rootName[0] == '\\' && rootName[1] == '\\')
+#endif
+	);
 }
 
 }
