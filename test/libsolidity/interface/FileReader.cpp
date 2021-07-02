@@ -385,19 +385,23 @@ BOOST_AUTO_TEST_CASE(isUNCPath)
 	BOOST_TEST(FileReader::isUNCPath("//root/"));
 
 #if defined(_WIN32)
-	// On Windows boost sees it as ///, which is equivalent to /.
+	// On Windows boost sees these as ///, which is equivalent to /
 	BOOST_TEST(!FileReader::isUNCPath("//\\"));
+	BOOST_TEST(!FileReader::isUNCPath("\\\\/"));
+	BOOST_TEST(!FileReader::isUNCPath("\\/\\"));
 
 	BOOST_TEST(FileReader::isUNCPath("\\\\"));
-	BOOST_TEST(FileReader::isUNCPath("\\\\/"));
 	BOOST_TEST(FileReader::isUNCPath("\\\\root"));
 	BOOST_TEST(FileReader::isUNCPath("\\\\root/"));
 #else
-	// on UNIX this is actually an UNC path.
+	// On UNIX it's actually an UNC path
 	BOOST_TEST(FileReader::isUNCPath("//\\"));
 
-	BOOST_TEST(!FileReader::isUNCPath("\\\\"));
+	// On UNIX these are just weird relative directory names consisting only of backslashes.
 	BOOST_TEST(!FileReader::isUNCPath("\\\\/"));
+	BOOST_TEST(!FileReader::isUNCPath("\\/\\"));
+
+	BOOST_TEST(!FileReader::isUNCPath("\\\\"));
 	BOOST_TEST(!FileReader::isUNCPath("\\\\root"));
 	BOOST_TEST(!FileReader::isUNCPath("\\\\root/"));
 #endif
