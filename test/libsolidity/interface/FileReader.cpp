@@ -68,37 +68,38 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_relative_path)
 	boost::filesystem::create_directories(tempDir.path() / "x/y/z");
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path() / "x/y/z");
 
-	// NOTE: If path to work dir contains symlinks, boost might resolve them, making the path
-	// different from tempDirPath.
-	soltestAssert(boost::filesystem::current_path().is_absolute(), "");
-	boost::filesystem::path tempDirPath = boost::filesystem::current_path().parent_path().parent_path().parent_path();
-	soltestAssert(tempDirPath.is_absolute(), "");
+	// NOTE: If path to work dir contains symlinks (of then the case on macOS), boost might resolve
+	// them, making the path different from tempDirPath.
+	boost::filesystem::path expectedWorkDir = boost::filesystem::current_path().parent_path().parent_path().parent_path();
+	// On Windows tempDir.path() normally contains the drive letter while the normalized path should not.
+	expectedWorkDir = "/" / expectedWorkDir.relative_path();
+	soltestAssert(expectedWorkDir.is_absolute(), "");
 
-	cout << "Actual: " << FileReader::normalizeCLIPathForVFS(".") << " | Expected: " << tempDirPath / "x/y/z/" << endl;
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS(".") == tempDirPath / "x/y/z/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./") == tempDirPath / "x/y/z/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("../") == tempDirPath / "x/y/");
+	cout << "Actual: " << FileReader::normalizeCLIPathForVFS(".") << " | Expected: " << expectedWorkDir / "x/y/z/" << endl;
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS(".") == expectedWorkDir / "x/y/z/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./") == expectedWorkDir / "x/y/z/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("../") == expectedWorkDir / "x/y/");
 
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a") == tempDirPath / "x/y/z/a");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/") == tempDirPath / "x/y/z/a/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/.") == tempDirPath / "x/y/z/a/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./a") == tempDirPath / "x/y/z/a");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./a/") == tempDirPath / "x/y/z/a/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./a/.") == tempDirPath / "x/y/z/a/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/b") == tempDirPath / "x/y/z/a/b");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/b/") == tempDirPath / "x/y/z/a/b/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a") == expectedWorkDir / "x/y/z/a");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/") == expectedWorkDir / "x/y/z/a/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/.") == expectedWorkDir / "x/y/z/a/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./a") == expectedWorkDir / "x/y/z/a");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./a/") == expectedWorkDir / "x/y/z/a/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./a/.") == expectedWorkDir / "x/y/z/a/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/b") == expectedWorkDir / "x/y/z/a/b");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/b/") == expectedWorkDir / "x/y/z/a/b/");
 
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("../a/b") == tempDirPath / "x/y/a/b");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("../../a/b") == tempDirPath / "x/a/b");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./a/b") == tempDirPath / "x/y/z/a/b");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("././a/b") == tempDirPath / "x/y/z/a/b");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("../a/b") == expectedWorkDir / "x/y/a/b");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("../../a/b") == expectedWorkDir / "x/a/b");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("./a/b") == expectedWorkDir / "x/y/z/a/b");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("././a/b") == expectedWorkDir / "x/y/z/a/b");
 
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/./b/") == tempDirPath / "x/y/z/a/b/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/../a/b/") == tempDirPath / "x/y/z/a/b/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/b/c/..") == tempDirPath / "x/y/z/a/b");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/b/c/../") == tempDirPath / "x/y/z/a/b/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/./b/") == expectedWorkDir / "x/y/z/a/b/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/../a/b/") == expectedWorkDir / "x/y/z/a/b/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/b/c/..") == expectedWorkDir / "x/y/z/a/b");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("a/b/c/../") == expectedWorkDir / "x/y/z/a/b/");
 
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("../../a/.././../p/../q/../a/b") == tempDirPath / "a/b");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("../../a/.././../p/../q/../a/b") == expectedWorkDir / "a/b");
 
 }
 
@@ -119,8 +120,9 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_unc_path)
 	TemporaryDirectory tempDir("file-reader-test-");
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path());
 
-	boost::filesystem::path workDir = boost::filesystem::current_path();
-	soltestAssert(workDir.is_absolute(), "");
+	// On Windows tempDir.path() normally contains the drive letter while the normalized path should not.
+	boost::filesystem::path expectedWorkDir = "/" / boost::filesystem::current_path().relative_path();
+	soltestAssert(expectedWorkDir.is_absolute(), "");
 
 	// UNC paths start with // or \\ followed by a name. They are used for network shares on Windows.
 	// On UNIX systems they are not supported but still treated in a special way.
@@ -135,10 +137,10 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_unc_path)
 	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/a/b/") == "//host/a/b/");
 #else
 	// On UNIX systems it's just a fancy relative path instead
-	cout << "Actual: " << FileReader::normalizeCLIPathForVFS("\\\\host/") << " | Expected: " << workDir / "\\\\host/" << endl;
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/") == workDir / "\\\\host/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/a/b") == workDir / "\\\\host/a/b");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/a/b/") == workDir / "\\\\host/a/b/");
+	cout << "Actual: " << FileReader::normalizeCLIPathForVFS("\\\\host/") << " | Expected: " << expectedWorkDir / "\\\\host/" << endl;
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/") == expectedWorkDir / "\\\\host/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/a/b") == expectedWorkDir / "\\\\host/a/b");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/a/b/") == expectedWorkDir / "\\\\host/a/b/");
 #endif
 }
 
@@ -147,7 +149,8 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_root_name_only)
 	TemporaryDirectory tempDir("file-reader-test-");
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path());
 
-	boost::filesystem::path workDir = boost::filesystem::current_path();
+	boost::filesystem::path expectedWorkDir = "/" / boost::filesystem::current_path().relative_path();
+	soltestAssert(expectedWorkDir.is_absolute(), "");
 
 	// A root **path** consists of a directory name (typically / or \) and the root name (drive
 	// letter (C:), UNC host name (//host), etc.). Either can be empty. Root path as a whole is an
@@ -156,19 +159,19 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_root_name_only)
 	// directory.
 
 	// UNC paths
-	cout << "Actual: " << FileReader::normalizeCLIPathForVFS("//") << " | Expected: " << "//" / workDir << endl;
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("//") == "//" / workDir);
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("//host") == "//host" / workDir);
+	cout << "Actual: " << FileReader::normalizeCLIPathForVFS("//") << " | Expected: " << "//" / expectedWorkDir << endl;
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("//") == "//" / expectedWorkDir);
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("//host") == "//host" / expectedWorkDir);
 
 	// On UNIX systems root name is empty.
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("") == workDir);
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("") == expectedWorkDir);
 
 #if defined(_WIN32)
-	boost::filesystem::path driveLetter = workDir.root_name();
+	boost::filesystem::path driveLetter = boost::filesystem::current_path().root_name();
 	solAssert(!driveLetter.empty(), "");
 	solAssert(driveLetter.is_relative(), "");
 
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS(driveLetter) == workDir);
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS(driveLetter) == expectedWorkDir);
 #endif
 }
 
@@ -178,12 +181,11 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_stripping_root_name)
 	TemporaryDirectory tempDir("file-reader-test-");
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path());
 
-	boost::filesystem::path workDir = boost::filesystem::current_path();
-	soltestAssert(workDir.is_absolute(), "");
-	soltestAssert(!workDir.root_name().empty(), "");
+	soltestAssert(boost::filesystem::current_path().is_absolute(), "");
+	soltestAssert(!boost::filesystem::current_path().root_name().empty(), "");
 
-	boost::filesystem::path normalizedPath = FileReader::normalizeCLIPathForVFS(workDir);
-	BOOST_TEST(normalizedPath == "/" / workDir.lexically_relative(workDir.root_name()));
+	boost::filesystem::path normalizedPath = FileReader::normalizeCLIPathForVFS(boost::filesystem::current_path());
+	BOOST_TEST(normalizedPath == "/" / boost::filesystem::current_path().relative_path());
 	BOOST_TEST(normalizedPath.root_name().empty());
 	BOOST_TEST(normalizedPath.root_directory() == "/");
 }
@@ -226,14 +228,14 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_case_sensitivity)
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path());
 	boost::filesystem::create_directories(tempDir.path() / "abc");
 
-	// On Windows tempDir.path() normally contains the drive letter while the normalized path should not.
-	boost::filesystem::path tempDirUnnamedRoot = "/" / tempDir.path().relative_path();
+	boost::filesystem::path expectedPrefix = "/" / tempDir.path().relative_path();
+	soltestAssert(expectedPrefix.is_absolute(), "");
 
 	bool caseSensitiveFilesystem = boost::filesystem::create_directories(tempDir.path() / "ABC");
 	soltestAssert(boost::filesystem::equivalent(tempDir.path() / "abc", tempDir.path() / "ABC") != caseSensitiveFilesystem, "");
 
-	BOOST_TEST((FileReader::normalizeCLIPathForVFS((tempDir.path() / "abc")).native() == (tempDirUnnamedRoot / "abc").native()));
-	BOOST_TEST((FileReader::normalizeCLIPathForVFS((tempDir.path() / "ABC")).native() == (tempDirUnnamedRoot / "ABC").native()));
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS((tempDir.path() / "abc")).native() == (expectedPrefix / "abc").native()));
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS((tempDir.path() / "ABC")).native() == (expectedPrefix / "ABC").native()));
 }
 
 BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_path_separators)
@@ -251,8 +253,11 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_should_not_resolve_symlinks)
 	if (!createSymlinkIfSupportedByFilesystem(tempDir.path() / "abc", tempDir.path() / "sym"))
 		return;
 
-	BOOST_TEST((FileReader::normalizeCLIPathForVFS(tempDir.path() / "sym/contract.sol") == tempDir.path() / "sym/contract.sol"));
-	BOOST_TEST((FileReader::normalizeCLIPathForVFS(tempDir.path() / "abc/contract.sol") == tempDir.path() / "abc/contract.sol"));
+	boost::filesystem::path expectedPrefix = "/" / tempDir.path().relative_path();
+	soltestAssert(expectedPrefix.is_absolute(), "");
+
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS(tempDir.path() / "sym/contract.sol") == expectedPrefix / "sym/contract.sol"));
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS(tempDir.path() / "abc/contract.sol") == expectedPrefix / "abc/contract.sol"));
 }
 
 BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_may_resolve_symlinks_in_workdir_when_path_is_relative)
@@ -264,14 +269,18 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_may_resolve_symlinks_in_workdir_when
 	if (!createSymlinkIfSupportedByFilesystem(tempDir.path() / "abc", tempDir.path() / "sym"))
 		return;
 
+	boost::filesystem::path expectedPrefix = "/" / tempDir.path().relative_path();
+	soltestAssert(expectedPrefix.is_absolute(), "");
+
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path() / "sym");
-	boost::filesystem::path actualWorkingDir = boost::filesystem::current_path();
+	boost::filesystem::path expectedWorkDir = "/" / boost::filesystem::current_path().relative_path();
+	soltestAssert(expectedWorkDir.is_absolute(), "");
 
 	// current_path() seems to return the with symlinks resolved. Whether it does or not,
 	// normalizeCLIPathForVFS() should use the same form of the working dir for relative paths.
-	BOOST_TEST((FileReader::normalizeCLIPathForVFS("contract.sol") == actualWorkingDir / "contract.sol"));
-	BOOST_TEST((FileReader::normalizeCLIPathForVFS(tempDir.path() / "sym/contract.sol") == tempDir.path() / "sym/contract.sol"));
-	BOOST_TEST((FileReader::normalizeCLIPathForVFS(tempDir.path() / "abc/contract.sol") == tempDir.path() / "abc/contract.sol"));
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS("contract.sol") == expectedWorkDir / "contract.sol"));
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS(tempDir.path() / "sym/contract.sol") == expectedPrefix / "sym/contract.sol"));
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS(tempDir.path() / "abc/contract.sol") == expectedPrefix / "abc/contract.sol"));
 }
 
 BOOST_AUTO_TEST_CASE(isPathPrefix_file_prefix)
