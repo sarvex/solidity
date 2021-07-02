@@ -246,8 +246,10 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_case_sensitivity)
 	// TMP:
 	cout << "normalizeCLIPathForVFS_case_sensitivity" << endl;
 	cout << "Actual: " << FileReader::normalizeCLIPathForVFS((tempDir.path() / "abc")) << " | Expected: " << (expectedPrefix / "abc") << endl;
-	BOOST_TEST((FileReader::normalizeCLIPathForVFS((tempDir.path() / "abc")).native() == (expectedPrefix / "abc").native()));
-	BOOST_TEST((FileReader::normalizeCLIPathForVFS((tempDir.path() / "ABC")).native() == (expectedPrefix / "ABC").native()));
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS((tempDir.path() / "abc")) == (expectedPrefix / "abc")));
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS((tempDir.path() / "abc")) != (expectedPrefix / "ABC")));
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS((tempDir.path() / "ABC")) != (expectedPrefix / "abc")));
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS((tempDir.path() / "ABC")) == (expectedPrefix / "ABC")));
 }
 
 BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_path_separators)
