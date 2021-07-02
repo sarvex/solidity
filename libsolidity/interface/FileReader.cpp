@@ -125,6 +125,12 @@ boost::filesystem::path FileReader::normalizeCLIPathForVFS(boost::filesystem::pa
 	if (!isUNCPath(normalizedPath))
 	{
 		boost::filesystem::path workingDirRootPath = boost::filesystem::weakly_canonical(boost::filesystem::current_path()).root_path();
+
+		// TMP:
+		std::cout << "workingDir           = " << boost::filesystem::current_path() << std::endl;
+		std::cout << "canonical workingDir = " << boost::filesystem::weakly_canonical(boost::filesystem::current_path()) << std::endl;
+		std::cout << "workingDirRootPath   = " << workingDirRootPath << std::endl;
+
 		if (normalizedPath.root_name() == workingDirRootPath)
 			normalizedRootPath = "/";
 		else if (normalizedPath.root_name().empty())
