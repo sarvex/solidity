@@ -284,10 +284,6 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_should_resolve_symlinks_in_workdir_w
 	if (!createSymlinkIfSupportedByFilesystem(tempDir.path() / "abc", tempDir.path() / "sym", true))
 		return;
 
-	// TMP:
-	soltestAssert(boost::filesystem::is_directory(tempDir.path() / "sym"), "");
-	soltestAssert(boost::filesystem::is_symlink(tempDir.path() / "sym"), "");
-
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path() / "sym");
 	boost::filesystem::path expectedWorkDir = "/" / boost::filesystem::weakly_canonical(boost::filesystem::current_path()).relative_path();
 	soltestAssert(expectedWorkDir.is_absolute() || expectedWorkDir.root_path() == "/", "");
