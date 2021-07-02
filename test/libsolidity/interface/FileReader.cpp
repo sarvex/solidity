@@ -226,11 +226,14 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_case_sensitivity)
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path());
 	boost::filesystem::create_directories(tempDir.path() / "abc");
 
+	// On Windows tempDir.path() normally contains the drive letter while the normalized path should not.
+	boost::filesystem::path tempDirUnnamedRoot = "/" / tempDir.path().relative_path();
+
 	bool caseSensitiveFilesystem = boost::filesystem::create_directories(tempDir.path() / "ABC");
 	soltestAssert(boost::filesystem::equivalent(tempDir.path() / "abc", tempDir.path() / "ABC") != caseSensitiveFilesystem, "");
 
-	BOOST_TEST((FileReader::normalizeCLIPathForVFS((tempDir.path() / "abc")).native() == (tempDir.path() / "abc").native()));
-	BOOST_TEST((FileReader::normalizeCLIPathForVFS((tempDir.path() / "ABC")).native() == (tempDir.path() / "ABC").native()));
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS((tempDir.path() / "abc")).native() == (tempDirUnnamedRoot / "abc").native()));
+	BOOST_TEST((FileReader::normalizeCLIPathForVFS((tempDir.path() / "ABC")).native() == (tempDirUnnamedRoot / "ABC").native()));
 }
 
 BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_path_separators)
