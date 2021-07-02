@@ -574,7 +574,7 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_normalization_and_weird_name
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path() / "x/y/z");
 	soltestAssert(tempDir.path().is_absolute(), "");
 
-	string uncPath = "/" + tempDir.path().generic_string();
+	string uncPath = "//" + tempDir.path().relative_path().generic_string();
 	soltestAssert(uncPath[0] == '/' && uncPath[1] == '/', "");
 	soltestAssert(uncPath[2] != '/', "");
 
