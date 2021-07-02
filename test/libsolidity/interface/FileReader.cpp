@@ -127,9 +127,9 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_unc_path)
 
 #if defined(_WIN32)
 	// On Windows an UNC path can also start with \\ instead of //
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/") == "\\\\host/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/a/b") == "\\\\host/a/b");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/a/b/") == "\\\\host/a/b/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/") == "//host/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/a/b") == "//host/a/b");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/a/b/") == "//host/a/b/");
 #else
 	// On UNIX systems it's just a fancy relative path instead
 	cout << "Actual: " << FileReader::normalizeCLIPathForVFS("\\\\host/") << " | Expected: " << tempDir.path() / "\\\\host/" << endl;

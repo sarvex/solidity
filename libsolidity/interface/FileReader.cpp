@@ -121,6 +121,7 @@ boost::filesystem::path FileReader::normalizeCLIPathForVFS(boost::filesystem::pa
 	// If the path is on the same drive as the working dir, for portability we prefer not to
 	// include the root name. Do do this only for non-UNC paths - my experiments show that when
 	// the working dir is an UNC path, / does not not actually refer to the root of the UNC path.
+	// For UNC paths only normalize the root name to start with //.
 	boost::filesystem::path normalizedRootPath = normalizedPath.root_path();
 	if (!isUNCPath(normalizedPath))
 	{
@@ -135,6 +136,20 @@ boost::filesystem::path FileReader::normalizeCLIPathForVFS(boost::filesystem::pa
 			normalizedRootPath = "/";
 		else if (normalizedPath.root_name().empty())
 			normalizedRootPath = workingDirRootPath;
+	}
+	else
+	{
+		solAssert(
+			boost::starts_with(normalizedPath.root_name().string(), "//") ||
+			boost::starts_with(normalizedPath.root_name().string(), "\\\\"),
+			""
+		);
+
+		string rootName = normalizedPath.root_name().string();
+		boost::filesystem::path normalizedRootPath =
+			normalizedPath.root_directory().string() +
+			"//" +
+			(rootName.size() > 2 ? rootName.substr(2, string::npos) : "");
 	}
 
 	boost::filesystem::path normalizedPathNoDotDot = normalizedPath;
