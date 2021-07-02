@@ -269,12 +269,12 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_may_resolve_symlinks_in_workdir_when
 	if (!createSymlinkIfSupportedByFilesystem(tempDir.path() / "abc", tempDir.path() / "sym"))
 		return;
 
-	boost::filesystem::path expectedPrefix = "/" / tempDir.path().relative_path();
-	soltestAssert(expectedPrefix.is_absolute(), "");
-
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path() / "sym");
 	boost::filesystem::path expectedWorkDir = "/" / boost::filesystem::current_path().relative_path();
 	soltestAssert(expectedWorkDir.is_absolute(), "");
+
+	boost::filesystem::path expectedPrefix = "/" / tempDir.path().relative_path();
+	soltestAssert(expectedPrefix.is_absolute(), "");
 
 	// current_path() seems to return the with symlinks resolved. Whether it does or not,
 	// normalizeCLIPathForVFS() should use the same form of the working dir for relative paths.
