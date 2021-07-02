@@ -85,7 +85,9 @@ public:
 	}
 
 	/// Normalizes a filesystem path in a way that removes small, inconsequential differences. Specifically:
-	/// - Makes the path absolute. If it is empty, it becomes the current working directory.
+	/// - Makes the path either be absolute or have slash as root (note that on Windows paths with
+	///   slash as root are not considered absolute by Boost). If it is empty, it becomes
+	///   the current working directory.
 	/// - Collapses redundant . and .. segments.
 	/// - Squashes sequences of multiple path separators into one.
 	/// - Ensures that forward slashes are used as path separators on all platforms.
@@ -100,7 +102,8 @@ public:
 	static boost::filesystem::path normalizeCLIPathForVFS(boost::filesystem::path const& _path);
 
 	/// Returns true if all the path components of @a _prefix are present at the beginning of @a _path.
-	/// Both paths must be absolute and normalized (no . or .. segments, no multiple consecutive slashes).
+	/// Both paths must be absolute (or have slash as root) and normalized (no . or .. segments, no
+	/// multiple consecutive slashes).
 	/// Paths are treated as case-sensitive. Does not require the path to actually exist in the
 	/// filesystem and does not follow symlinks. Only considers whole segments, e.g. /abc/d is not
 	/// considered a prefix of /abc/def. Both paths must be non-empty.
@@ -119,7 +122,8 @@ public:
 
 private:
 	/// If @a _path starts with a number of .. segments, returns a path consisting only of those
-	/// segments (root name is not included). Otherwise returns an empty path. @a _path must be absolute.
+	/// segments (root name is not included). Otherwise returns an empty path. @a _path must be
+	/// absolute (or have slash as root).
 	static boost::filesystem::path absoluteDotDotPrefix(boost::filesystem::path const& _path);
 
 	/// Returns true if the path contains any .. segments.

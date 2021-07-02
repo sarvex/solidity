@@ -121,7 +121,7 @@ boost::filesystem::path FileReader::normalizeCLIPathForVFS(boost::filesystem::pa
 		std::cout << "    relative path: " << normalizedPath.relative_path() << std::endl;
 	}
 
-	solAssert(normalizedPath.is_absolute(), "");
+	solAssert(normalizedPath.is_absolute() || normalizedPath.root_path() == "/", "");
 
 	// lexically_normal() will not squash paths like "/../../" into "/". We have to do it manually.
 	boost::filesystem::path dotDotPrefix = absoluteDotDotPrefix(normalizedPath);
@@ -182,8 +182,9 @@ boost::filesystem::path FileReader::normalizeCLIPathForVFS(boost::filesystem::pa
 bool FileReader::isPathPrefix(boost::filesystem::path _prefix, boost::filesystem::path const& _path)
 {
 	solAssert(!_prefix.empty() && !_path.empty(), "");
-	solAssert(_prefix.is_absolute() || isUNCPath(_prefix), "");
-	solAssert(_path.is_absolute() || isUNCPath(_path), "");
+	// NOTE: On Windows paths starting with a slash (rather than a drive letter) are considered relative by boost.
+	solAssert(_prefix.is_absolute() || isUNCPath(_prefix) || _prefix.root_path() == "/", "");
+	solAssert(_path.is_absolute() || isUNCPath(_path) || _path.root_path() == "/", "");
 	solAssert(_prefix == _prefix.lexically_normal() && _path == _path.lexically_normal(), "");
 	solAssert(!hasDotDotSegments(_prefix) && !hasDotDotSegments(_path), "");
 
@@ -212,7 +213,7 @@ boost::filesystem::path FileReader::stripPrefixIfPresent(boost::filesystem::path
 
 boost::filesystem::path FileReader::absoluteDotDotPrefix(boost::filesystem::path const& _path)
 {
-	solAssert(_path.is_absolute(), "");
+	solAssert(_path.is_absolute() || _path.root_path() == "/", "");
 
 	boost::filesystem::path _pathWithoutRoot = _path.relative_path();
 	boost::filesystem::path prefix;
