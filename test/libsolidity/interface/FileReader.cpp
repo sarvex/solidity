@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_should_not_resolve_symlinks)
 	BOOST_TEST((FileReader::normalizeCLIPathForVFS(tempDir.path() / "abc/contract.sol") == expectedPrefix / "abc/contract.sol"));
 }
 
-BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_may_resolve_symlinks_in_workdir_when_path_is_relative)
+BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_should_resolve_symlinks_in_workdir_when_path_is_relative)
 {
 	TemporaryDirectory tempDir("file-reader-test-");
 	soltestAssert(tempDir.path().is_absolute(), "");
@@ -289,14 +289,12 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_may_resolve_symlinks_in_workdir_when
 	soltestAssert(boost::filesystem::is_symlink(tempDir.path() / "sym"), "");
 
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path() / "sym");
-	boost::filesystem::path expectedWorkDir = "/" / boost::filesystem::current_path().relative_path();
+	boost::filesystem::path expectedWorkDir = "/" / boost::filesystem::weakly_canonical(boost::filesystem::current_path()).relative_path();
 	soltestAssert(expectedWorkDir.is_absolute(), "");
 
 	boost::filesystem::path expectedPrefix = "/" / tempDir.path().relative_path();
 	soltestAssert(expectedPrefix.is_absolute(), "");
 
-	// current_path() seems to return the with symlinks resolved. Whether it does or not,
-	// normalizeCLIPathForVFS() should use the same form of the working dir for relative paths.
 	BOOST_TEST((FileReader::normalizeCLIPathForVFS("contract.sol") == expectedWorkDir / "contract.sol"));
 	BOOST_TEST((FileReader::normalizeCLIPathForVFS(tempDir.path() / "sym/contract.sol") == expectedPrefix / "sym/contract.sol"));
 	BOOST_TEST((FileReader::normalizeCLIPathForVFS(tempDir.path() / "abc/contract.sol") == expectedPrefix / "abc/contract.sol"));
