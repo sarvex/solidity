@@ -746,6 +746,12 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_symlinks)
 	boost::filesystem::path workDir = boost::filesystem::current_path();
 	soltestAssert(workDir.is_absolute(), "");
 
+	// TMP:
+	soltestAssert(boost::filesystem::is_directory(tempDir.path() / "r/sym"), "");
+	soltestAssert(boost::filesystem::is_symlink(tempDir.path() / "r/sym"), "");
+	soltestAssert(boost::filesystem::is_directory("../x/y"), "");
+	soltestAssert(!boost::filesystem::is_symlink("../x/y"), "");
+
 	vector<string> commandLine = {
 		"solc",
 
