@@ -116,7 +116,13 @@ boost::filesystem::path FileReader::normalizeCLIPathForVFS(boost::filesystem::pa
 
 	// TMP:
 	if (!normalizedPath.is_absolute())
+	{
 		std::cout << "PROBLEM: '" << _path << "' was normalized into a relative path: " << normalizedPath << std::endl;
+		std::cout << "    root dir:      " << normalizedPath.root_directory() << std::endl;
+		std::cout << "    root name:     " << normalizedPath.root_name() << std::endl;
+		std::cout << "    root path:     " << normalizedPath.root_path() << std::endl;
+		std::cout << "    relative path: " << normalizedPath.relative_path() << std::endl;
+	}
 
 	solAssert(normalizedPath.is_absolute(), "");
 
