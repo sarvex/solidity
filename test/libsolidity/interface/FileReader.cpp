@@ -262,7 +262,7 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_should_not_resolve_symlinks)
 	soltestAssert(tempDir.path().is_absolute(), "");
 	boost::filesystem::create_directories(tempDir.path() / "abc");
 
-	if (!createSymlinkIfSupportedByFilesystem(tempDir.path() / "abc", tempDir.path() / "sym"))
+	if (!createSymlinkIfSupportedByFilesystem(tempDir.path() / "abc", tempDir.path() / "sym", true))
 		return;
 
 	boost::filesystem::path expectedPrefix = "/" / tempDir.path().relative_path();
@@ -281,7 +281,7 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_should_resolve_symlinks_in_workdir_w
 	soltestAssert(tempDir.path().is_absolute(), "");
 	boost::filesystem::create_directories(tempDir.path() / "abc");
 
-	if (!createSymlinkIfSupportedByFilesystem(tempDir.path() / "abc", tempDir.path() / "sym"))
+	if (!createSymlinkIfSupportedByFilesystem(tempDir.path() / "abc", tempDir.path() / "sym", true))
 		return;
 
 	// TMP:
