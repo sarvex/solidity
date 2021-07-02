@@ -105,14 +105,19 @@ BOOST_AUTO_TEST_CASE(cli_input)
 	createEmptyFilesWithParentDirs({tempDir1.path() / "input1.sol"});
 	createEmptyFilesWithParentDirs({tempDir2.path() / "input2.sol"});
 
+	boost::filesystem::path expectedDir1 = "/" / tempDir1.path().relative_path();
+	boost::filesystem::path expectedDir2 = "/" / tempDir2.path().relative_path();
+	soltestAssert(expectedDir1.is_absolute() || expectedDir1.root_path() == "/", "");
+	soltestAssert(expectedDir2.is_absolute() || expectedDir2.root_path() == "/", "");
+
 	vector<ImportRemapper::Remapping> expectedRemappings = {
 		{"", "a", "b/c/d"},
 		{"a", "b", "c/d/e/"},
 	};
 	map<string, string> expectedSources = {
 		{"<stdin>", "\n"},
-		{(tempDir1.path() / "input1.sol").generic_string(), ""},
-		{(tempDir2.path() / "input2.sol").generic_string(), ""},
+		{(expectedDir1 / "input1.sol").generic_string(), ""},
+		{(expectedDir2 / "input2.sol").generic_string(), ""},
 	};
 	PathSet expectedAllowedPaths = {
 		boost::filesystem::canonical(tempDir1.path()),
@@ -145,8 +150,11 @@ BOOST_AUTO_TEST_CASE(cli_ignore_missing_some_files_exist)
 	TemporaryDirectory tempDir2("file-reader-test-");
 	createEmptyFilesWithParentDirs({tempDir1.path() / "input1.sol"});
 
+	boost::filesystem::path expectedDir1 = "/" / tempDir1.path().relative_path();
+	soltestAssert(expectedDir1.is_absolute() || expectedDir1.root_path() == "/", "");
+
 	// NOTE: Allowed paths should not be added for skipped files.
-	map<string, string> expectedSources = {{(tempDir1.path() / "input1.sol").generic_string(), ""}};
+	map<string, string> expectedSources = {{(expectedDir1 / "input1.sol").generic_string(), ""}};
 	PathSet expectedAllowedPaths = {boost::filesystem::canonical(tempDir1.path())};
 
 	OptionsReaderAndMessages result = parseCommandLineAndReadInputFiles({
@@ -314,11 +322,7 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_no_base_path)
 	soltestAssert(tempDirCurrent.path().is_absolute(), "");
 	soltestAssert(tempDirOther.path().is_absolute(), "");
 
-	// NOTE: If path to work dir contains symlinks, boost might resolve them, making the path
-	// different from tempDirCurrent.
-	boost::filesystem::path expectedWorkDir = "/" / boost::filesystem::current_path().relative_path();
 	boost::filesystem::path expectedOtherDir = "/" / tempDirOther.path().relative_path();
-	soltestAssert(expectedWorkDir.is_absolute() || expectedWorkDir.root_path() == "/", "");
 	soltestAssert(expectedOtherDir.is_absolute() || expectedOtherDir.root_path() == "/", "");
 
 	vector<string> commandLine = {
@@ -333,8 +337,8 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_no_base_path)
 	expectedOptions.input.paths = {
 		"contract1.sol",
 		"c/d/contract2.sol",
-		expectedWorkDir / "contract3.sol",
-		expectedOtherDir / "contract4.sol",
+		tempDirCurrent.path() / "contract3.sol",
+		tempDirOther.path() / "contract4.sol",
 	};
 
 	map<string, string> expectedSources = {
@@ -367,7 +371,7 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_no_base_path)
 	BOOST_TEST((result.options == expectedOptions));
 	BOOST_TEST(result.reader.sourceCodes() == expectedSources);
 	BOOST_TEST(result.reader.allowedDirectories() == expectedAllowedDirectories);
-	BOOST_TEST(result.reader.basePath() == expectedOptions.input.basePath);
+	BOOST_TEST(result.reader.basePath() == "");
 }
 
 BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_base_path_same_as_work_dir)
@@ -378,6 +382,8 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_base_path_same_as_work_dir)
 	soltestAssert(tempDirCurrent.path().is_absolute(), "");
 	soltestAssert(tempDirOther.path().is_absolute(), "");
 
+	// NOTE: If path to work dir contains symlinks, boost might resolve them, making the path
+	// different from tempDirCurrent.
 	boost::filesystem::path expectedWorkDir = "/" / boost::filesystem::current_path().relative_path();
 	boost::filesystem::path expectedOtherDir = "/" / tempDirOther.path().relative_path();
 	soltestAssert(expectedWorkDir.is_absolute() || expectedWorkDir.root_path() == "/", "");
@@ -396,10 +402,10 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_base_path_same_as_work_dir)
 	expectedOptions.input.paths = {
 		"contract1.sol",
 		"c/d/contract2.sol",
-		expectedWorkDir / "contract3.sol",
-		expectedOtherDir / "contract4.sol",
+		tempDirCurrent.path() / "contract3.sol",
+		tempDirOther.path() / "contract4.sol",
 	};
-	expectedOptions.input.basePath = expectedWorkDir;
+	expectedOptions.input.basePath = tempDirCurrent.path();
 
 	map<string, string> expectedSources = {
 		{"contract1.sol", ""},
@@ -431,7 +437,7 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_base_path_same_as_work_dir)
 	BOOST_TEST((result.options == expectedOptions));
 	BOOST_TEST(result.reader.sourceCodes() == expectedSources);
 	BOOST_TEST(result.reader.allowedDirectories() == expectedAllowedDirectories);
-	BOOST_TEST(result.reader.basePath() == expectedOptions.input.basePath);
+	BOOST_TEST(result.reader.basePath() == expectedWorkDir);
 }
 
 BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_base_path_different_from_work_dir)
@@ -465,9 +471,9 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_base_path_different_from_wor
 	expectedOptions.input.paths = {
 		"contract1.sol",
 		"c/d/contract2.sol",
-		expectedWorkDir / "contract3.sol",
-		expectedOtherDir / "contract4.sol",
-		expectedBaseDir / "contract5.sol",
+		tempDirCurrent.path() / "contract3.sol",
+		tempDirOther.path() / "contract4.sol",
+		tempDirBase.path() / "contract5.sol",
 	};
 	expectedOptions.input.basePath = tempDirBase.path();
 
@@ -546,8 +552,8 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_relative_base_path)
 		{"contract2.sol", ""},
 		{expectedWorkDir.generic_string() + "/contract3.sol", ""},
 		{"contract4.sol", ""},
-		{tempDirOther.path().generic_string() + "/contract5.sol", ""},
-		{tempDirOther.path().generic_string() + "/base/contract6.sol", ""},
+		{expectedOtherDir.generic_string() + "/contract5.sol", ""},
+		{expectedOtherDir.generic_string() + "/base/contract6.sol", ""},
 	};
 
 	FileReader::FileSystemPathSet expectedAllowedDirectories = {
