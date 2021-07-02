@@ -228,6 +228,15 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_case_sensitivity)
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path());
 	boost::filesystem::create_directories(tempDir.path() / "abc");
 
+	// TMP:
+	cout << "Replace root with /: "<< "/" / tempDir.path().relative_path() << endl;
+	cout << "Replace root with / (fsp): "<< boost::filesystem::path("/") / tempDir.path().relative_path() << endl;
+	cout << "Replace root with \\: "<< "\\" / tempDir.path().relative_path() << endl;
+	cout << "Replace root with / lexically_relative: "<< "/" / tempDir.path().lexically_relative(tempDir.path().root_path()) << endl;
+	cout << "Replace root with / lexically_relative (fs) : " << boost::filesystem::path("/") / tempDir.path().lexically_relative(tempDir.path().root_path()) << endl;
+	cout << "Replace root with \\ lexically_relative: "<< "\\" / tempDir.path().lexically_relative(tempDir.path().root_path()) << endl;
+	cout << "Replace root with / as string: "<< boost::filesystem::path("/" + tempDir.path().relative_path().generic_string()) << endl;
+
 	boost::filesystem::path expectedPrefix = boost::filesystem::path("/") / tempDir.path().lexically_relative(tempDir.path().root_path());
 	soltestAssert(expectedPrefix.is_absolute(), "");
 
