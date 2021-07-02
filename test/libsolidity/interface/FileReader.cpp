@@ -291,6 +291,9 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_should_resolve_symlinks_in_workdir_w
 	boost::filesystem::path expectedPrefix = "/" / tempDir.path().relative_path();
 	soltestAssert(expectedPrefix.is_absolute() || expectedPrefix.root_path() == "/", "");
 
+	// TMP:
+	cout << "normalizeCLIPathForVFS_should_resolve_symlinks_in_workdir_when_path_is_relative" << endl;
+	cout << "Actual: " << FileReader::normalizeCLIPathForVFS("contract.sol") << " | Expected: " << expectedWorkDir / "contract.sol" << endl;
 	BOOST_TEST((FileReader::normalizeCLIPathForVFS("contract.sol") == expectedWorkDir / "contract.sol"));
 	BOOST_TEST((FileReader::normalizeCLIPathForVFS(tempDir.path() / "sym/contract.sol") == expectedPrefix / "sym/contract.sol"));
 	BOOST_TEST((FileReader::normalizeCLIPathForVFS(tempDir.path() / "abc/contract.sol") == expectedPrefix / "abc/contract.sol"));
