@@ -196,6 +196,7 @@ BOOST_AUTO_TEST_CASE(cli_not_a_file)
 BOOST_AUTO_TEST_CASE(standard_json_base_path)
 {
 	TemporaryDirectory tempDir("file-reader-test-");
+	TemporaryWorkingDirectory tempWorkDir(tempDir.path().root_path());
 
 	OptionsReaderAndMessages result = parseCommandLineAndReadInputFiles({
 		"solc",
@@ -209,7 +210,7 @@ BOOST_AUTO_TEST_CASE(standard_json_base_path)
 	BOOST_TEST(result.options.input.paths.empty());
 	BOOST_TEST(result.reader.sourceCodes().empty());
 	BOOST_TEST(result.reader.allowedDirectories().empty());
-	BOOST_TEST(result.reader.basePath() == tempDir.path());
+	BOOST_TEST(result.reader.basePath() == "/" / tempDir.path().relative_path());
 }
 
 BOOST_AUTO_TEST_CASE(standard_json_no_input_file)
