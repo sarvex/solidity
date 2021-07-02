@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_case_sensitivity)
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path());
 	boost::filesystem::create_directories(tempDir.path() / "abc");
 
-	boost::filesystem::path expectedPrefix = "/" / tempDir.path().relative_path();
+	boost::filesystem::path expectedPrefix = boost::filesystem::path("/") / tempDir.path().lexically_relative(tempDir.path().root_path());
 	soltestAssert(expectedPrefix.is_absolute(), "");
 
 	bool caseSensitiveFilesystem = boost::filesystem::create_directories(tempDir.path() / "ABC");
