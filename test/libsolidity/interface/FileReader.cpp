@@ -381,16 +381,21 @@ BOOST_AUTO_TEST_CASE(stripPathPrefix_directory_prefix)
 BOOST_AUTO_TEST_CASE(isUNCPath)
 {
 	BOOST_TEST(FileReader::isUNCPath("//"));
-	BOOST_TEST(FileReader::isUNCPath("//\\"));
 	BOOST_TEST(FileReader::isUNCPath("//root"));
 	BOOST_TEST(FileReader::isUNCPath("//root/"));
 
 #if defined(_WIN32)
+	// On Windows boost sees it as ///, which is equivalent to /.
+	BOOST_TEST(!FileReader::isUNCPath("//\\"));
+
 	BOOST_TEST(FileReader::isUNCPath("\\\\"));
 	BOOST_TEST(FileReader::isUNCPath("\\\\/"));
 	BOOST_TEST(FileReader::isUNCPath("\\\\root"));
 	BOOST_TEST(FileReader::isUNCPath("\\\\root/"));
 #else
+	// on UNIX this is actually an UNC path.
+	BOOST_TEST(FileReader::isUNCPath("//\\"));
+
 	BOOST_TEST(!FileReader::isUNCPath("\\\\"));
 	BOOST_TEST(!FileReader::isUNCPath("\\\\/"));
 	BOOST_TEST(!FileReader::isUNCPath("\\\\root"));
