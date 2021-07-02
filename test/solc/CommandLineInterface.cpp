@@ -342,9 +342,9 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_no_base_path)
 	};
 
 	FileReader::FileSystemPathSet expectedAllowedDirectories = {
-		workDir / "c/d",
-		workDir,
-		tempDirOther.path(),
+		boost::filesystem::canonical(workDir) / "c/d",
+		boost::filesystem::canonical(workDir),
+		boost::filesystem::canonical(tempDirOther.path()),
 	};
 
 	createEmptyFilesWithParentDirs(expectedOptions.input.paths);
