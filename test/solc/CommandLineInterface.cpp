@@ -604,8 +604,8 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_normalization_and_weird_name
 		"../../a/b/contract12.sol",
 		"a/../b/contract13.sol",
 		"a/b/../../contract14.sol",
-		tempDir.path().string() + "/x/y/z/a/../b/contract15.sol",
-		tempDir.path().string() + "/x/y/z/a/b/../../contract16.sol",
+		workDir.string() + "/a/../b/contract15.sol",
+		workDir.string() + "/a/b/../../contract16.sol",
 
 		// Dot dot segments going beyond filesystem root
 		"/.." + tempDir.path().generic_string() + "/contract17.sol",
@@ -645,8 +645,8 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_normalization_and_weird_name
 		"../../a/b/contract12.sol",
 		"a/../b/contract13.sol",
 		"a/b/../../contract14.sol",
-		tempDir.path().string() + "/x/y/z/a/../b/contract15.sol",
-		tempDir.path().string() + "/x/y/z/a/b/../../contract16.sol",
+		workDir.string() + "/a/../b/contract15.sol",
+		workDir.string() + "/a/b/../../contract16.sol",
 
 		"/.." + tempDir.path().string() + "/contract17.sol",
 		"/../.." + tempDir.path().string() + "/contract18.sol",
