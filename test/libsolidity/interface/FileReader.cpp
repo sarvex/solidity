@@ -119,6 +119,9 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_unc_path)
 	TemporaryDirectory tempDir("file-reader-test-");
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path());
 
+	boost::filesystem::path workDir = boost::filesystem::current_path();
+	soltestAssert(workDir.is_absolute(), "");
+
 	// UNC paths start with // or \\ followed by a name. They are used for network shares on Windows.
 	// On UNIX systems they are not supported but still treated in a special way.
 	BOOST_TEST(FileReader::normalizeCLIPathForVFS("//host/") == "//host/");
@@ -132,10 +135,10 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_unc_path)
 	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/a/b/") == "//host/a/b/");
 #else
 	// On UNIX systems it's just a fancy relative path instead
-	cout << "Actual: " << FileReader::normalizeCLIPathForVFS("\\\\host/") << " | Expected: " << tempDir.path() / "\\\\host/" << endl;
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/") == tempDir.path() / "\\\\host/");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/a/b") == tempDir.path() / "\\\\host/a/b");
-	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/a/b/") == tempDir.path() / "\\\\host/a/b/");
+	cout << "Actual: " << FileReader::normalizeCLIPathForVFS("\\\\host/") << " | Expected: " << workDir / "\\\\host/" << endl;
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/") == workDir / "\\\\host/");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/a/b") == workDir / "\\\\host/a/b");
+	BOOST_TEST(FileReader::normalizeCLIPathForVFS("\\\\host/a/b/") == workDir / "\\\\host/a/b/");
 #endif
 }
 
