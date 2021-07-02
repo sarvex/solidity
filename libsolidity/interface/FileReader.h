@@ -106,10 +106,10 @@ public:
 	/// considered a prefix of /abc/def. Both paths must be non-empty.
 	static bool isPathPrefix(boost::filesystem::path _prefix, boost::filesystem::path const& _path);
 
-	/// Returns a copy of @a _path with @a _prefix removed from the beginning.
-	/// Only works for arguments for which isPathPrefix() returns true.
+	/// If @a _prefix is actually a prefix of @p _path, removes it from @a _path to make it relative.
+	/// Otherwise returns @a _path unchanged.
 	/// Returns '.' if @a _path and @_prefix are identical.
-	static boost::filesystem::path stripPathPrefix(boost::filesystem::path _prefix, boost::filesystem::path const& _path);
+	static boost::filesystem::path stripPrefixIfPresent(boost::filesystem::path _prefix, boost::filesystem::path const& _path);
 
 	// Returns true if the specified path is an UNC path.
 	// UNC paths start with // followed by a name (on Windows they can also start with \\).

@@ -378,30 +378,44 @@ BOOST_AUTO_TEST_CASE(isPathPrefix_case_sensitivity)
 	BOOST_TEST(!FileReader::isPathPrefix("/a/BC/def/", "/a/bc/def/contract.sol"));
 }
 
-BOOST_AUTO_TEST_CASE(stripPathPrefix_file_prefix)
+BOOST_AUTO_TEST_CASE(stripPrefixIfPresent_file_prefix)
 {
-	BOOST_TEST(FileReader::stripPathPrefix("/", "/contract.sol") == "contract.sol");
-	BOOST_TEST(FileReader::stripPathPrefix("/contract.sol", "/contract.sol") == ".");
-	BOOST_TEST(FileReader::stripPathPrefix("/contract.sol/", "/contract.sol") == ".");
-	BOOST_TEST(FileReader::stripPathPrefix("/contract.sol/.", "/contract.sol") == ".");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/", "/contract.sol") == "contract.sol");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/contract.sol", "/contract.sol") == ".");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/contract.sol/", "/contract.sol") == ".");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/contract.sol/.", "/contract.sol") == ".");
 
-	BOOST_TEST(FileReader::stripPathPrefix("/", "/a/bc/def/contract.sol") == "a/bc/def/contract.sol");
-	BOOST_TEST(FileReader::stripPathPrefix("/a", "/a/bc/def/contract.sol") == "bc/def/contract.sol");
-	BOOST_TEST(FileReader::stripPathPrefix("/a/", "/a/bc/def/contract.sol") == "bc/def/contract.sol");
-	BOOST_TEST(FileReader::stripPathPrefix("/a/bc", "/a/bc/def/contract.sol") == "def/contract.sol");
-	BOOST_TEST(FileReader::stripPathPrefix("/a/bc/def/", "/a/bc/def/contract.sol") == "contract.sol");
-	BOOST_TEST(FileReader::stripPathPrefix("/a/bc/def/contract.sol", "/a/bc/def/contract.sol") == ".");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/", "/a/bc/def/contract.sol") == "a/bc/def/contract.sol");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/a", "/a/bc/def/contract.sol") == "bc/def/contract.sol");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/a/", "/a/bc/def/contract.sol") == "bc/def/contract.sol");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/a/bc", "/a/bc/def/contract.sol") == "def/contract.sol");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/a/bc/def/", "/a/bc/def/contract.sol") == "contract.sol");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/a/bc/def/contract.sol", "/a/bc/def/contract.sol") == ".");
+
+
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/contract.sol", "/token.sol") == "/token.sol");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/contract", "/contract.sol") == "/contract.sol");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/contract.sol", "/contract") == "/contract");
+
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/a/b/c/contract.sol", "/a/b/contract.sol") == "/a/b/contract.sol");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/a/b/contract.sol", "/a/b/c/contract.sol") == "/a/b/c/contract.sol");
 }
 
-BOOST_AUTO_TEST_CASE(stripPathPrefix_directory_prefix)
+BOOST_AUTO_TEST_CASE(stripPrefixIfPresent_directory_prefix)
 {
-	BOOST_TEST(FileReader::stripPathPrefix("/", "/") == ".");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/", "/") == ".");
 
-	BOOST_TEST(FileReader::stripPathPrefix("/", "/a/bc/def/") == "a/bc/def/");
-	BOOST_TEST(FileReader::stripPathPrefix("/a", "/a/bc/def/") == "bc/def/");
-	BOOST_TEST(FileReader::stripPathPrefix("/a/", "/a/bc/def/") == "bc/def/");
-	BOOST_TEST(FileReader::stripPathPrefix("/a/bc", "/a/bc/def/") == "def/");
-	BOOST_TEST(FileReader::stripPathPrefix("/a/bc/def/", "/a/bc/def/") == ".");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/", "/a/bc/def/") == "a/bc/def/");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/a", "/a/bc/def/") == "bc/def/");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/a/", "/a/bc/def/") == "bc/def/");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/a/bc", "/a/bc/def/") == "def/");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/a/bc/def/", "/a/bc/def/") == ".");
+
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/a", "/b/") == "/b/");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/a/", "/b/") == "/b/");
+
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/a/b/c/", "/a/b/") == "/a/b/");
+	BOOST_TEST(FileReader::stripPrefixIfPresent("/a/b/c", "/a/b/") == "/a/b/");
 }
 
 BOOST_AUTO_TEST_CASE(isUNCPath)

@@ -46,10 +46,7 @@ void FileReader::setSource(boost::filesystem::path const& _path, SourceCode _sou
 	boost::filesystem::path normalizedPath = normalizeCLIPathForVFS(_path);
 	boost::filesystem::path prefix = (m_basePath.empty() ? normalizeCLIPathForVFS(".") : m_basePath);
 
-	if (isPathPrefix(prefix, normalizedPath))
-		normalizedPath = stripPathPrefix(prefix, normalizedPath);
-
-	m_sourceCodes[normalizedPath.generic_string()] = std::move(_source);
+	m_sourceCodes[stripPrefixIfPresent(prefix, normalizedPath).generic_string()] = std::move(_source);
 }
 
 void FileReader::setSources(StringMap _sources)
@@ -200,9 +197,10 @@ bool FileReader::isPathPrefix(boost::filesystem::path _prefix, boost::filesystem
 	return !strippedPath.empty() && *strippedPath.begin() != "..";
 }
 
-boost::filesystem::path FileReader::stripPathPrefix(boost::filesystem::path _prefix, boost::filesystem::path const& _path)
+boost::filesystem::path FileReader::stripPrefixIfPresent(boost::filesystem::path _prefix, boost::filesystem::path const& _path)
 {
-	solAssert(isPathPrefix(_prefix, _path), "");
+	if (!isPathPrefix(_prefix, _path))
+		return _path;
 
 	if (_prefix.filename_is_dot())
 		_prefix.remove_filename();
