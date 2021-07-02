@@ -136,6 +136,8 @@ boost::filesystem::path FileReader::normalizeCLIPathForVFS(boost::filesystem::pa
 	boost::filesystem::path normalizedRootPath = normalizedPath.root_path();
 	if (!isUNCPath(normalizedPath))
 	{
+		// ASSUMPTION: The canonical path always includes the root name if the root name is not empty.
+		// I.e. if a file on Windows is on drive C:, we'll get C:/ rather than / in a canonical path.
 		boost::filesystem::path workingDirRootPath = boost::filesystem::weakly_canonical(boost::filesystem::current_path()).root_path();
 
 		// TMP:
@@ -145,8 +147,6 @@ boost::filesystem::path FileReader::normalizeCLIPathForVFS(boost::filesystem::pa
 
 		if (normalizedRootPath == workingDirRootPath)
 			normalizedRootPath = "/";
-		else if (normalizedRootPath == "/")
-			normalizedRootPath = workingDirRootPath;
 	}
 	else
 	{
