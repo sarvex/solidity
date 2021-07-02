@@ -183,9 +183,9 @@ BOOST_AUTO_TEST_CASE(normalizeCLIPathForVFS_stripping_root_name)
 	soltestAssert(!workDir.root_name().empty(), "");
 
 	boost::filesystem::path normalizedPath = FileReader::normalizeCLIPathForVFS(workDir);
-	BOOST_TEST(normalizedPath == "\\" / workDir.lexically_relative(workDir.root_name()));
+	BOOST_TEST(normalizedPath == "/" / workDir.lexically_relative(workDir.root_name()));
 	BOOST_TEST(normalizedPath.root_name().empty());
-	BOOST_TEST(normalizedPath.root_directory() == "\\");
+	BOOST_TEST(normalizedPath.root_directory() == "/");
 }
 #endif
 
