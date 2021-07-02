@@ -619,8 +619,8 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_normalization_and_weird_name
 		tempDir.path().string() + "/x/y/z/a/b/../../contract16.sol",
 
 		// Dot dot segments going beyond filesystem root
-		"/.." + tempDir.path().generic_string() + "/contract17.sol",
-		"/../.." + tempDir.path().generic_string() + "/contract18.sol",
+		"/../" + tempDir.path().relative_path().generic_string() + "/contract17.sol",
+		"/../../" + tempDir.path().relative_path().generic_string() + "/contract18.sol",
 
 		// Name conflict with source unit name of stdin
 		"<stdin>",
@@ -659,8 +659,8 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_normalization_and_weird_name
 		expectedWorkDir.string() + "/a/../b/contract15.sol",
 		expectedWorkDir.string() + "/a/b/../../contract16.sol",
 
-		"/.." + tempDir.path().string() + "/contract17.sol",
-		"/../.." + tempDir.path().string() + "/contract18.sol",
+		"/../" + tempDir.path().relative_path().string() + "/contract17.sol",
+		"/../../" + tempDir.path().relative_path().string() + "/contract18.sol",
 
 		"<stdin>",
 
@@ -693,8 +693,8 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_normalization_and_weird_name
 		{"b/contract15.sol", ""},
 		{"contract16.sol", ""},
 
-		{tempDir.path().generic_string() + "/contract17.sol", ""},
-		{tempDir.path().generic_string() + "/contract18.sol", ""},
+		{"/" + tempDir.path().relative_path().generic_string() + "/contract17.sol", ""},
+		{"/" + tempDir.path().relative_path().generic_string() + "/contract18.sol", ""},
 
 		{"<stdin>", ""},
 
