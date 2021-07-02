@@ -124,8 +124,8 @@ boost::filesystem::path FileReader::normalizeCLIPathForVFS(boost::filesystem::pa
 	boost::filesystem::path dotDotPrefix = absoluteDotDotPrefix(normalizedPath);
 
 	// If the path is on the same drive as the working dir, for portability we prefer not to
-	// include the root name. Do do this only for non-UNC paths - my experiments show that when
-	// the working dir is an UNC path, / does not not actually refer to the root of the UNC path.
+	// include the root name. Do this only for non-UNC paths - my experiments show that on Windows
+	// when the working dir is an UNC path, / does not not actually refer to the root of the UNC path.
 	// For UNC paths only normalize the root name to start with //.
 	boost::filesystem::path normalizedRootPath = normalizedPath.root_path();
 	if (!isUNCPath(normalizedPath))
@@ -137,9 +137,9 @@ boost::filesystem::path FileReader::normalizeCLIPathForVFS(boost::filesystem::pa
 		std::cout << "canonical workingDir = " << boost::filesystem::weakly_canonical(boost::filesystem::current_path()) << std::endl;
 		std::cout << "workingDirRootPath   = " << workingDirRootPath << std::endl;
 
-		if (normalizedPath.root_name() == workingDirRootPath)
+		if (normalizedRootPath == workingDirRootPath)
 			normalizedRootPath = "/";
-		else if (normalizedPath.root_name().empty())
+		else if (normalizedRootPath == "/")
 			normalizedRootPath = workingDirRootPath;
 	}
 	else
