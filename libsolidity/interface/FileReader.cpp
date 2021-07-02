@@ -113,6 +113,7 @@ boost::filesystem::path FileReader::normalizeCLIPathForVFS(boost::filesystem::pa
 	// NOTE: boost path preserves certain differences that are ignored by its operator ==.
 	// E.g. "a//b" vs "a/b" or "a/b/" vs "a/b/.". lexically_normal() does remove these differences.
 	boost::filesystem::path normalizedPath =  boost::filesystem::absolute(_path).lexically_normal();
+	solAssert(normalizedPath.is_absolute(), "");
 
 	// lexically_normal() will not squash paths like "/../../" into "/". We have to do it manually.
 	boost::filesystem::path dotDotPrefix = absoluteDotDotPrefix(normalizedPath);
