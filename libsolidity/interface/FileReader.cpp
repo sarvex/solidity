@@ -107,9 +107,15 @@ ReadCallback::Result FileReader::readFile(string const& _kind, string const& _so
 
 boost::filesystem::path FileReader::normalizeCLIPathForVFS(boost::filesystem::path const& _path)
 {
+	boost::filesystem::path canonicalWorkDir = boost::filesystem::weakly_canonical(boost::filesystem::current_path());
+
+	// NOTE: On UNIX systems the path returned from current_path() has symlinks resolved while on
+	// Windows it does not. To get consistent results we resolve them on all platforms.
+	boost::filesystem::path absolutePath = boost::filesystem::absolute(_path, canonicalWorkDir);
+
 	// NOTE: boost path preserves certain differences that are ignored by its operator ==.
 	// E.g. "a//b" vs "a/b" or "a/b/" vs "a/b/.". lexically_normal() does remove these differences.
-	boost::filesystem::path normalizedPath =  boost::filesystem::absolute(_path).lexically_normal();
+	boost::filesystem::path normalizedPath =  absolutePath.lexically_normal();
 
 	// TMP:
 	if (!normalizedPath.is_absolute())
@@ -135,7 +141,7 @@ boost::filesystem::path FileReader::normalizeCLIPathForVFS(boost::filesystem::pa
 	{
 		// ASSUMPTION: The canonical path always includes the root name if the root name is not empty.
 		// I.e. if a file on Windows is on drive C:, we'll get C:/ rather than / in a canonical path.
-		boost::filesystem::path workingDirRootPath = boost::filesystem::weakly_canonical(boost::filesystem::current_path()).root_path();
+		boost::filesystem::path workingDirRootPath = canonicalWorkDir.root_path();
 
 		// TMP:
 		std::cout << "workingDir           = " << boost::filesystem::current_path() << std::endl;
