@@ -382,7 +382,9 @@ bool CommandLineInterface::readInputFiles()
 
 	m_fileReader.setBasePath(m_options.input.basePath);
 
-	if (m_fileReader.basePath() != "" && !boost::filesystem::is_directory(m_fileReader.basePath()))
+	// NOTE: Need canonical() here because symlinks on Windows do not pass is_directory() check
+	// unlike those on UNIX systems.
+	if (m_fileReader.basePath() != "" && !boost::filesystem::is_directory(boost::filesystem::canonical(m_fileReader.basePath())))
 	{
 		serr() << "Base path must be a directory: " << m_fileReader.basePath() << "\n";
 		return false;
