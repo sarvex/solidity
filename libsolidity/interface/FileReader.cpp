@@ -145,7 +145,7 @@ boost::filesystem::path FileReader::normalizeCLIPathForVFS(boost::filesystem::pa
 
 		// TMP:
 		std::cout << "workingDir           = " << boost::filesystem::current_path() << std::endl;
-		std::cout << "canonical workingDir = " << boost::filesystem::weakly_canonical(boost::filesystem::current_path()) << std::endl;
+		std::cout << "canonical workingDir = " << canonicalWorkDir << std::endl;
 		std::cout << "workingDirRootPath   = " << workingDirRootPath << std::endl;
 
 		if (normalizedRootPath == workingDirRootPath)
