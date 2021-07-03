@@ -600,10 +600,13 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_normalization_and_weird_name
 	vector<string> commandLine = {
 		"solc",
 
+#if !defined(_WIN32)
 		// URLs. We interpret them as local paths.
+		// Note that : is not allowed in file names on Windows.
 		"file://c/d/contract1.sol",
 		"file:///c/d/contract2.sol",
 		"https://example.com/contract3.sol",
+#endif
 
 		// Redundant slashes
 		"a/b//contract4.sol",
@@ -646,9 +649,11 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_normalization_and_weird_name
 
 	CommandLineOptions expectedOptions = defaultCommandLineOptions();
 	expectedOptions.input.paths = {
+#if !defined(_WIN32)
 		"file://c/d/contract1.sol",
 		"file:///c/d/contract2.sol",
 		"https://example.com/contract3.sol",
+#endif
 
 		"a/b//contract4.sol",
 		"a/b///contract5.sol",
@@ -680,9 +685,11 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_normalization_and_weird_name
 	};
 
 	map<string, string> expectedSources = {
+#if !defined(_WIN32)
 		{"file:/c/d/contract1.sol", ""},
 		{"file:/c/d/contract2.sol", ""},
 		{"https:/example.com/contract3.sol", ""},
+#endif
 
 		{"a/b/contract4.sol", ""},
 		{"a/b/contract5.sol", ""},
@@ -714,8 +721,10 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_normalization_and_weird_name
 
 	boost::filesystem::path canonicalTempDir = boost::filesystem::canonical(tempDir.path());
 	FileReader::FileSystemPathSet expectedAllowedDirectories = {
+#if !defined(_WIN32)
 		canonicalTempDir / "x/y/z/file:/c/d",
 		canonicalTempDir / "x/y/z/https:/example.com",
+#endif
 		canonicalTempDir / "x/y/z/a/b",
 		canonicalTempDir / "x/y/z",
 		canonicalTempDir / "x/y/z/b",
