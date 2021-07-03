@@ -509,7 +509,7 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_base_path_different_from_wor
 	BOOST_TEST((result.options == expectedOptions));
 	BOOST_TEST(result.reader.sourceCodes() == expectedSources);
 	BOOST_TEST(result.reader.allowedDirectories() == expectedAllowedDirectories);
-	BOOST_TEST(result.reader.basePath() == expectedOptions.input.basePath);
+	BOOST_TEST(result.reader.basePath() == expectedBaseDir);
 }
 
 BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_relative_base_path)
