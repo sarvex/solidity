@@ -748,6 +748,14 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_normalization_and_weird_name
 	for (auto const& pair: result.reader.sourceCodes())
 		cout << pair.first << " [" << pair.second << "]" << endl;
 
+	// TMP:
+	cout << "EXPECTED ALLOWED PATHS" << endl;
+	for (auto const& dir: expectedAllowedDirectories)
+		cout << dir << endl;
+	cout << "ACTUAL ALLOWED PATHS" << endl;
+	for (auto const& dir: result.reader.allowedDirectories())
+		cout << dir << endl;
+
 	BOOST_TEST(result.stderrContent == "");
 	BOOST_TEST(result.stdoutContent == "");
 	BOOST_REQUIRE(result.success);
