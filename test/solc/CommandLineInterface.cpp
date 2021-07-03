@@ -764,10 +764,11 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_symlinks)
 	boost::filesystem::create_directories(tempDir.path() / "r");
 	TemporaryWorkingDirectory tempWorkDir(tempDir.path() / "r");
 
-	if (!createSymlinkIfSupportedByFilesystem("../x/y", tempDir.path() / "r/sym", true))
+	if (
+		!createSymlinkIfSupportedByFilesystem("../x/y", tempDir.path() / "r/sym", true) ||
+		!createSymlinkIfSupportedByFilesystem("contract.sol", tempDir.path() / "x/y/z/contract_symlink.sol", false)
+	)
 		return;
-
-	boost::filesystem::create_symlink("contract.sol", tempDir.path() / "x/y/z/contract_symlink.sol");
 
 	boost::filesystem::path expectedWorkDir = "/" / boost::filesystem::current_path().relative_path();
 	soltestAssert(expectedWorkDir.is_absolute() || expectedWorkDir.root_path() == "/", "");
