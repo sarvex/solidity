@@ -628,10 +628,11 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_normalization_and_weird_name
 		"/../" + tempDir.path().relative_path().generic_string() + "/contract17.sol",
 		"/../../" + tempDir.path().relative_path().generic_string() + "/contract18.sol",
 
-		// Name conflict with source unit name of stdin
+#if !defined(_WIN32)
+		// Name conflict with source unit name of stdin.
+		// Note that < and > are not allowed in file names on Windows.
 		"<stdin>",
 
-#if !defined(_WIN32)
 		// UNC paths on UNIX just resolve into normal paths. On Windows this would be an network
 		// share (and an error unless the share actually exists so I can't test it here).
 		uncPath + "/contract19.sol",
@@ -668,9 +669,9 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_normalization_and_weird_name
 		"/../" + tempDir.path().relative_path().string() + "/contract17.sol",
 		"/../../" + tempDir.path().relative_path().string() + "/contract18.sol",
 
+#if !defined(_WIN32)
 		"<stdin>",
 
-#if !defined(_WIN32)
 		uncPath + "/contract19.sol",
 
 		"a\\b\\contract20.sol",
@@ -702,9 +703,9 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_normalization_and_weird_name
 		{"/" + tempDir.path().relative_path().generic_string() + "/contract17.sol", ""},
 		{"/" + tempDir.path().relative_path().generic_string() + "/contract18.sol", ""},
 
+#if !defined(_WIN32)
 		{"<stdin>", ""},
 
-#if !defined(_WIN32)
 		{uncPath + "/contract19.sol", ""},
 		{"a\\b\\contract20.sol", ""},
 		{"C:\\a\\b\\contract21.sol", ""},
