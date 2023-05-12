@@ -77,10 +77,7 @@ class FileReport:
                 return 'E'
             if no_bytecode:
                 return 'B'
-            if no_metadata:
-                return 'M'
-
-            return '.'
+            return 'M' if no_metadata else '.'
 
 
 @dataclass

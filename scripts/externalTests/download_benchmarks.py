@@ -127,7 +127,7 @@ def download_benchmarks(
         pr_info = github.pull_request(pull_request_id)
         branch = pr_info['head']['ref']
         expected_commit_hash = pr_info['head']['sha']
-    elif base_of_pr is not None:
+    else:
         pr_info = github.pull_request(base_of_pr)
         branch = pr_info['base']['ref']
         expected_commit_hash = pr_info['base']['sha']
